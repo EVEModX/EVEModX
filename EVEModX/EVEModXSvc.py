@@ -1,11 +1,14 @@
 # coding=utf-8
 
 import os, os.path
+import sys
 
 import blue
 import logmodule
 import service
 import svc
+
+from . import configs
 
 class EVEModXSvc(service.Service):
     __guid__ = 'svc.EVEModXSvc'
@@ -15,6 +18,7 @@ class EVEModXSvc(service.Service):
 
     def Run(self, *args):
         service.Service.Run(self, *args)
+        sys.path.append(configs.MODS_PATH)
         self.mods = {}
 
     def load_mods(self):

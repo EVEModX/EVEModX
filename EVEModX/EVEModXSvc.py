@@ -2,6 +2,7 @@
 
 import os, os.path
 import sys
+import json
 
 import blue
 import logmodule
@@ -22,19 +23,21 @@ class EVEModXSvc(service.Service):
         self.mods = {}
 
     def load_mods(self):
-        EVEModX_Modules_path = blue.sysinfo.GetUserDocumentsDirectory() + '/EVE/EVEModX/Mods/'
-        mod_names = []
-        # TODO: Check zip packages
-        for name in os.listdir(EVEModX_Modules_path):
-            if name not in self.mods.keys():
-                if os.path.isfile(EVEModX_Modules_path + name + '/__init__.py'):
-                    mod_names.append(name)
-        for mod_name in mod_names:
-            try:
-                self.mods[mod_name] = __import__(mod_name)
-            except:
-                logmodule.general.Log('EVEModX: Import %s Error' % mod_name, logmodule.LGNOTICE)
-
+        for name in os.listdir(configs.MODS_PATH):
+            # TODO: Check zip packages
+            if os.path.isdir(configs.MODS_PATH + name):
+                if os.path.isfile(configs.MODS_PATH + name + '/__init__.py') and os.path.isfile(configs.MODS_PATH + name + '/info.json'):
+                    if name not in self.mods.keys():
+                        try:
+                            info = json.load(open(configs.MODS_PATH + name + '/info.json', 'r'), encoding="utf-8")
+                        except:
+                            logmodule.general.Log('EVEModX: Parsing info.json failed: %s' % name, logmodule.LGNOTICE)
+                        if info and info.get('name') == name:
+                            try:
+                                info['module'] =  __import__(name)
+                                self.mods[name] = info
+                            except:
+                                logmodule.general.Log('EVEModX: Importing module failed: %s' % name, logmodule.LGNOTICE)
 
 
 def start_service():

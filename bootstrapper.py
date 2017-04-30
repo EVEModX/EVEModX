@@ -15,11 +15,11 @@ __import__('autoexec_%s' % boot.role)
 def EVEModX_bootstrap():
     import sys, os
 
-    EVEModX_path = blue.sysinfo.GetUserDocumentsDirectory() + '/EVE/EVEModX/Framework/'
+    EVEModX_Framework_path = blue.sysinfo.GetUserDocumentsDirectory() + '/EVE/EVEModX/Framework/'
 
     # TODO: Check EVEModX install
     
-    sys.path.append(EVEModX_path)
+    sys.path.append(EVEModX_Framework_path)
 
     while True:
         blue.pyos.synchro.SleepWallclock(1000)

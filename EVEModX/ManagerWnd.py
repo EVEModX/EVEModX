@@ -20,7 +20,13 @@ class EVEModXWnd(uicontrols.Window):
         self.SetTopparentHeight(64)
         self.SetWndIcon(self.default_iconNum)
         uicontrols.WndCaptionLabel(text='EVEModX Manager', parent=self.sr.topParent, align=uiconst.RELATIVE, subcaption='Version: ' + configs.VERSION)
-        self.modScroll = ScrollContainer(name='modScroll', parent=self.sr.main, align=uiconst.TOALL, padding=const.defaultPadding, showUnderlay=True)
+        self.installedMods = Container(name='installedMods', parent=self.sr.main)
+        self.modRepo = Container(name='modRepo', parent=self.sr.main)
+        self.modScroll = ScrollContainer(name='modScroll', parent=self.installedMods, align=uiconst.TOALL, padding=const.defaultPadding, showUnderlay=True)
+        self.tabs = uicontrols.TabGroup(name='tabs', parent=self.sr.main, tabs=[
+            ('Installed Mods', self.installedMods, self, 'installedMods'),
+            ('Mod Repository', self.modRepo, self, 'modRepo')
+        ], idx=0)
         sm.GetService('EVEModXSvc').load_mods()
         for mod_name, mod_data in sorted(sm.GetService('EVEModXSvc').mods.iteritems()):
             ModEntry(parent=self.modScroll, data=mod_data)

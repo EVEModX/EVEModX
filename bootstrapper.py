@@ -4,32 +4,39 @@
     EVEModX Bootstrapper
     Usage: exefile /tools=path/to/bootstrapper.py
 """
+import sys, os
 
 import blue
+import service
 import logmodule
 
 # Start client
 __import__('autoexec_%s' % boot.role)
 
+FRAMEWORK_PATH = blue.sysinfo.GetUserDocumentsDirectory() + '/EVE/EVEModX/EVEModX.zip'
 
 def EVEModX_bootstrap():
-    import sys, os
-
-    EVEModX_Framework_path = blue.sysinfo.GetUserDocumentsDirectory() + '/EVE/EVEModX/Framework/'
-
-    # TODO: Check EVEModX install
+    if os.path.isfile(FRAMEWORK_PATH):
+        sys.path.append(FRAMEWORK_PATH)
+        start_framework()
+    else:
+        install_framework()
     
-    sys.path.append(EVEModX_Framework_path)
-
-    while True:
+def install_framework():
+    import requests
+    framework_info = requests.get(r'https://repo.evemodx.com/api/framework/info')
+    print framework_info.json()
+    # TODO: Install Framework
+    
+def start_framework():
+    import __builtin__
+    while not hasattr(__builtin__, 'sm') or sm.state != service.SERVICE_RUNNING:
         blue.pyos.synchro.SleepWallclock(1000)
-        import __builtin__
-        if hasattr(__builtin__, 'sm') and sm.IsServiceRunning('counter'):
-            logmodule.general.Log("Initializing EVEModX...", logmodule.LGNOTICE)
-            import EVEModX
-            EVEModX.init()
-            return
 
-logmodule.general.Log("EVEModX bootstrapper loaded, waiting for service manager...", logmodule.LGNOTICE)
+    logmodule.general.Log("Initializing EVEModX...", logmodule.LGNOTICE)
+    import EVEModX
+    EVEModX.init()
+
+
 import stackless
 stackless.tasklet(EVEModX_bootstrap)().run()

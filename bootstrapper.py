@@ -21,13 +21,28 @@ def EVEModX_bootstrap():
         start_framework()
     else:
         install_framework()
-    
+
+
 def install_framework():
-    import requests
-    framework_info = requests.get(r'https://repo.evemodx.com/api/framework/info')
-    print framework_info.json()
-    # TODO: Install Framework
-    
+    global DigestError
+    import requests,hashlib
+    try:
+        framework_info = requests.get(r'https://repo.evemodx.com/api/framework/info')
+        package = requests.get(framework_info.json()['Data']['DownloadUrl'])
+        class DigestError(Exception):
+            pass
+        with open(FRAMEWORK_PATH,'wb') as f:
+            if hashlib.md5(package.content) != framework_info.json()['Data']['Md5Sum']:
+                raise DigestError
+            f.write(package.content)
+    except requests.exceptions.RequestException:
+        blue.os.ShowErrorMessageBox(u'Framework installation failed, please retry later or contact developer')
+    except DigestError:
+        blue.os.ShowErrorMessageBox(u'Framework corrupted, please try again later')
+    except:
+        blue.os.ShowErrorMessageBox(u'Generic Error, please contact developer')
+
+
 def start_framework():
     import __builtin__
     while not hasattr(__builtin__, 'sm') or sm.state != service.SERVICE_RUNNING:

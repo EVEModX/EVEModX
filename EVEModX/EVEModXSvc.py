@@ -36,8 +36,10 @@ class EVEModXSvc(service.Service):
                             try:
                                 info['module'] =  __import__(name)
                                 self.mods[name] = info
-                            except:
+                            except ImportError:
                                 logmodule.general.Log('EVEModX: Importing module failed: %s' % name, logmodule.LGNOTICE)
+                            except Exception as e:
+                                logmodule.general.Log('EVEModX: Importing module failed: %s' % e, logmodule.LGNOTICE)
 
 
 def start_service():

@@ -29,14 +29,14 @@ def install_framework():
         framework_info = requests.get(r'https://repo.evemodx.com/api/framework/info')
         package = requests.get(framework_info.json()['Data']['DownloadUrl'])
         if hashlib.md5(package.content) != framework_info.json()['Data']['Md5Sum']:
-            blue.os.ShowErrorMessageBox(u'Framework corrupted, please try again later')
+            blue.os.ShowErrorMessageBox('Installation Error','Framework corrupted, please try again later')
             return
         with open(FRAMEWORK_PATH,'wb') as f:
             f.write(package.content)
     except requests.exceptions.RequestException:
-        blue.os.ShowErrorMessageBox(u'Framework installation failed, please retry later or contact developer')
+        blue.os.ShowErrorMessageBox('Installation Error','Framework installation failed, please retry later or contact developer')
     except:
-        blue.os.ShowErrorMessageBox(u'Generic Error, please contact developer')
+        blue.os.ShowErrorMessageBox('Installation Error','Generic Error, please contact developer')
 
 
 def start_framework():

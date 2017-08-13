@@ -8,18 +8,20 @@ from carbonui.primitives.container import Container
 from carbonui.control.scrollContainer import ScrollContainer
 from eve.client.script.ui.control.themeColored import LineThemeColored
 
-from . import configs
+from . import settings
+
 
 class EVEModXWnd(uicontrols.Window):
     default_caption = 'EVEModX Manager'
     default_minSize = (300, 200)
     default_windowID = 'EVEModX'
     default_iconNum = 'res:/ui/texture/WindowIcons/settings.png'
+
     def ApplyAttributes(self, attributes):
         uicontrols.Window.ApplyAttributes(self, attributes)
         self.SetTopparentHeight(64)
         self.SetWndIcon(self.default_iconNum)
-        uicontrols.WndCaptionLabel(text='EVEModX Manager', parent=self.sr.topParent, align=uiconst.RELATIVE, subcaption='Version: ' + configs.VERSION)
+        uicontrols.WndCaptionLabel(text='EVEModX Manager', parent=self.sr.topParent, align=uiconst.RELATIVE, subcaption='Version: ' + settings.VERSION)
         self.installedMods = Container(name='installedMods', parent=self.sr.main)
         self.modRepo = Container(name='modRepo', parent=self.sr.main)
         self.modScroll = ScrollContainer(name='modScroll', parent=self.installedMods, align=uiconst.TOALL, padding=const.defaultPadding, showUnderlay=True)
@@ -27,15 +29,17 @@ class EVEModXWnd(uicontrols.Window):
             ('Installed Mods', self.installedMods, self, 'installedMods'),
             ('Mod Repository', self.modRepo, self, 'modRepo')
         ], idx=0)
-        sm.GetService('EVEModXSvc').load_mods()
-        for mod_name, mod_data in sorted(sm.GetService('EVEModXSvc').mods.iteritems()):
-            ModEntry(parent=self.modScroll, data=mod_data)
+
+        for mod_name, mod_obj in sorted(sm.GetService('EVEModXSvc').mods.iteritems()):
+            ModEntry(parent=self.modScroll, data=mod_obj)
+
 
 def OpenEVEModXWindow():
     EVEModXWnd.Open()
 
 OpenEVEModXWindow.nameString = u"EVEModX"
 OpenEVEModXWindow.descriptionString = u"Open EVEModX Manager"
+
 
 def RegisterInNeocom():
     from eve.client.script.ui.shared.neocom.neocom import neocomCommon, neocomSvc
@@ -62,9 +66,12 @@ class ModEntry(uicontrols.ContainerAutoSize):
     def ApplyAttributes(self, attributes):
         uicontrols.ContainerAutoSize.ApplyAttributes(self, attributes)
         data = attributes.data
-        text = r'<fontsize=18><b>%s</b></fontsize> %s %s, by %s<br><br>%s' % (data.get('display_name', data.get('name')), data.get('name'), data.get('version'), data.get('author'), data.get('description'))
+        text = r'<fontsize=18><b>%s</b></fontsize> %s %s, by %s<br><br>%s' % (data.display_name, data.name, data.version, data.author, data.description)
         uicontrols.EveLabelMedium(text=text, parent=self, align=uiconst.TOTOP, padding=const.defaultPadding)
         self.buttonCont = Container(name='buttonCont', parent=self, align=uiconst.TOTOP, height=18, padTop=4)
-        for button in data['module'].BUTTONS:
-            uicontrols.Button(parent=self.buttonCont, align=uiconst.TORIGHT, label=button[0], func=button[1], args=button[2], padRight=4, hint=button[3])
+        for button in getattr(data.module, 'BUTTONS', ()):
+            try:
+                uicontrols.Button(parent=self.buttonCont, align=uiconst.TORIGHT, label=button[0], func=button[1], args=button[2], padRight=4, hint=button[3])
+            except:
+                pass
         LineThemeColored(parent=self, align=uiconst.TOTOP, padTop=4)

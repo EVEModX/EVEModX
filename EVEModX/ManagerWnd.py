@@ -54,7 +54,8 @@ def RegisterInNeocom():
         return wrapper
 
     CommandService.SetDefaultShortcutMappingCORE = MonkeyPatchForCmdSvc(CommandService.SetDefaultShortcutMappingCORE)
-    neocomSvc.BTNDATARAW_BY_ID['EVEModXWindow'] = neocomSvc.BtnDataRaw(cmdName='OpenEVEModXWindow', wndCls=EVEModXWnd)
+    from eve.client.script.ui.shared.neocom.neocom.btnData.btnDataRaw import BtnDataRaw
+    neocomSvc.BTNDATARAW_BY_ID['EVEModXWindow'] = BtnDataRaw(cmdName='OpenEVEModXWindow', wndCls=EVEModXWnd)
     neocomSvc.RAWDATA_EVEMENU.append(util.KeyVal(label='EVEModX', btnType=neocomCommon.BTNTYPE_CMD, id='EVEModXWindow', children=None))
 
 
